@@ -3,10 +3,12 @@ var mario, marioRSImg, marioLRImg, marioRRImg, marioLSImg, fireball, fireballG, 
 var iG, ground, groundImg, ground2, ground3, groundG, ground4;
 var gameState = "play";
 var moving, lava, score = 0;
+var mushroom, mushroomImg, mushroomG;
 
+var lives = 2;
 
-
-
+var mushroomTouch = false;
+var fireballTouch = false;
 
 
 function preload(){
@@ -16,6 +18,7 @@ function preload(){
   marioLRImg = loadAnimation("th (2) (1).png", "th (1) (1).png");
   groundImg = loadImage("groundd.png");
   fireballImg = loadImage("Fireball.png");
+  mushroomImg = loadImage("mushroom.png");
   
 }
 
@@ -47,6 +50,7 @@ function setup() {
   lava.shapeColor = "red";
 
   fireballG = new Group();
+  mushroomG = new Group();
   
 
   mario.setCollider("rectangle", -75, 20, 100, 180);
@@ -75,29 +79,55 @@ function draw() {
       mario.velocityX = 0;
     }
 
-    var obstacle = round(Math.random(1,4));
+    var obstacle = Math.floor(Math.random() *3);
+    console.log(obstacle);
   
     if (World.frameCount % 150 == 0) {
       if (obstacle == 1) {
         spawnFireball();
         
-      } else if (obstacle == 2) {
+      }
+      if (obstacle == 2) {
+        spawnMushroom();
         
-      } else if (obstacle == 3) {
+      } 
+      if (obstacle == 3) {
         
       }
     }
     if(mario.isTouching(lava)){
-      gameState = "end";
+      lives -= 1;
+      mario.x = 400
     }
     if(fireballG.isTouching(mario)){
-      gameState = "end";
+      if(!fireballTouch){
+        lives -= 1;
+        fireballTouch = true;
+      }
+      setTimeout(() => {
+        fireballTouch = false;
+      }, 3000);
+      fireball.destroy();
+    }
+    if(mushroomG.isTouching(mario)){
+      if(!mushroomTouch){
+        lives += 1;
+        mushroomTouch = true;
+      }
+      setTimeout(() => {
+        mushroomTouch = false;
+      }, 3000);
+      mushroom.destroy();
     }
     score = score + Math.round(getFrameRate()/50);
     
     textSize(20);
     fill(255);
     text("Score: "+ score,500,30);
+    text("Lives:"+ lives, 500, 50 );
+    if(lives == 0){
+      gameState = "end";
+    }
 
       
 
@@ -197,6 +227,14 @@ function spawnFireball(){
   fireball.setLifetime=170;
   fireballG.add(fireball);
 }
+function spawnMushroom(){
+  mushroom =createSprite(600,500);
+  mushroom.scale =0.05;
+  mushroom.velocityX = -6;
+  mushroom.addAnimation("mushroom", mushroomImg);
+  mushroom.setLifetime=170;
+  mushroomG.add(mushroom)
+}
 
 function reset(){
   gameState = "play";
@@ -205,6 +243,7 @@ function reset(){
   
   
   score = 0;
+  lives = 2;
  }
 
 
